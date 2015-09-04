@@ -1,0 +1,28 @@
+public class PdfReportTest {
+	public static void main(String[] args) throws SQLException, JRException, FileNotFoundException {
+		Connection connection = new ConnectionFactory().getConnection();
+		
+		JasperCompileManager.compileReportToFile("my_report.jrxml");
+		
+		Map<String, Object> params = new HashMap<String, Object>();
+		JasperPrint jasperPrint = JasperFillManager.fillReport("my_report.jasper", params , connection);
+
+		Exporter<ExporterInput, PdfReportConfiguration, PdfExporterConfiguration, OutputStreamExporterOutput> exporter = new JRPdfExporter();
+		
+		PdfReportConfiguration reportconfiguration = new SimplePdfReportConfiguration();
+		exporter.setConfiguration(reportconfiguration);
+		
+		PdfExporterConfiguration exporterConfiguration = new SimplePdfExporterConfiguration();
+		exporter.setConfiguration(exporterConfiguration);
+		
+		ExporterInput input = new SimpleExporterInput(jasperPrint);
+		exporter.setExporterInput(input);
+		
+		OutputStreamExporterOutput output = new SimpleOutputStreamExporterOutput(new FileOutputStream("my_report.pdf"));
+		exporter.setExporterOutput(output);
+	
+		exporter.exportReport();
+		
+		connection.close();
+	}
+}
